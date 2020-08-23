@@ -1,0 +1,60 @@
+body{
+  background-color:#eeeeee;
+  text-align: center;
+}
+.deleteButtonChat{
+  cursor: pointer;
+}
+#tit{
+  color:#32e0c4;
+  font-family: 'Pacifico', cursive;
+  font-size: 30px;
+  padding: none;
+  display: inline;
+}
+#tagLine{
+ display: inline;
+}
+h2{
+  color: #393e46;
+  font-family: 'Pacifico', cursive;
+  padding: 1%;
+}
+#interest{
+  color: #393e46;
+  font-family: 'Pacifico', cursive;
+  font-size: 20px;
+}
+select:focus{
+  border-color: #32e0c4;
+  border-style: solid;
+  border-width: 0.2rem;
+  min-width: 150px;
+  width: auto;
+  height: 300px;
+  }
+.divider{
+  margin-top: 0.2%;
+}
+.btn{
+  margin: auto 250px;
+}
+.testbutton {
+  font-family: helvetica;
+  font-weight: bold;
+  color: #32E0C4 !important;
+  font-size: 17px;
+  text-shadow: 1px 1px 0px #222831;
+  box-shadow: 1px 1px 1px #444446;
+  padding: 10px 25px;
+  border-radius: 40px;
+  border: 2px solid #222831;
+  background: #393E46;
+  background: linear-gradient(to top, #393E46, #222831);
+  margin-top: 1.5%;
+}
+.testbutton:hover {
+  color: #393E46 !important;
+  background: #393E46;
+  background: linear-gradient(to top, #393E46, #32e0c4);
+}
