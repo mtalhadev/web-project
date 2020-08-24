@@ -3,6 +3,22 @@ import './App.css'
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid';
+import { makeStyles } from '@material-ui/core/styles';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import FormHelperText from '@material-ui/core/FormHelperText';
+import FormControl from '@material-ui/core/FormControl';
+import Select from '@material-ui/core/Select';
+
+const useStyles = makeStyles((theme) => ({
+  formControl: {
+    margin: theme.spacing(1),
+    minWidth: 120,
+  },
+  selectEmpty: {
+    marginTop: theme.spacing(2),
+  },
+}));
 export default function App() {
     useEffect(() => {
 
@@ -335,8 +351,7 @@ alert("No Users found,please try again")
                 <div>
                     <nav class="navbar navbar-light bg-light" style={{ backgroundColor: "#f8f9fa", display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: "10px 20px" }}>
                         <a class="navbar-brand" href="#">
-                            <img src="/docs/4.5/assets/brand/bootstrap-solid.svg" width="30" height="30" class="d-inline-block align-top" alt="" loading="lazy" />
-                            <p id="tit">Omegle Clone</p>
+                            <p id="tit" style={{textDecoration:"none"}}>Chatberg</p>
                         </a>
                         <div>
                             <p id="tagLine">Talk With Strangers!</p>
@@ -351,7 +366,7 @@ alert("No Users found,please try again")
                         <label id="interest" for="cars">Choose Interests:</label>
                         <div class="divider"></div>
                         <br />
-                        <select
+                        {/* <select
                             name="interest"
                             id="interest"
                             value={state.interest}
@@ -367,7 +382,28 @@ alert("No Users found,please try again")
                             <option value="nature">Nature</option>
                             <option value="sFiction">Science Fiction</option>
                             <option value="music">Music</option>
-                        </select>
+                        </select> */}
+                        <FormControl variant="filled" className={classes.formControl}>
+        <InputLabel id="demo-simple-select-filled-label">Interest</InputLabel>
+        <Select
+          labelId="demo-simple-select-filled-label"
+          id="demo-simple-select-filled"
+          name="interest"
+          value={state.interest}
+          onChange={handleInputChange}
+        >
+          <MenuItem value="">
+            <em>None</em>
+          </MenuItem>
+          <MenuItem value={"Cars"}>Cars</MenuItem>
+          <MenuItem value={"Dating"}>Dating</MenuItem>
+          <MenuItem value={"Programming"}>Programming</MenuItem>
+          <MenuItem value={"Comedy"}>Comedy</MenuItem>
+          <MenuItem value={"Nature"}>Nature</MenuItem>
+          <MenuItem value={"Sci-fi"}>Sci-fi</MenuItem>
+          <MenuItem value={"Music"}>Music</MenuItem>
+        </Select>
+      </FormControl>
                         <div class="buttonDiv" style={{ display: "block", marginTop: "20px" }}>
                             {/* <Link to="/chat" class="testbutton" >Find Stranger</Link> */}
                             <button onClick={addInQueue} class="testbutton">Find Stranger</button>
