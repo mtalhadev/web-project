@@ -1,36 +1,21 @@
-import React, { useEffect } from 'react';
-// import { connect } from 'react-redux'
-import { BrowserRouter as Router, Route } from 'react-router-dom'
-import Home from './Home'
-import Chat from './Chat'
-function App(props) {
+import React, { Component } from 'react';
+import Main from './components/MainComponent';
+import { BrowserRouter } from 'react-router-dom';
 
-  return (
-    <div>
-      <Router>
-      
-          <>
-            <Route path="/chat" component={Chat} />
-            <Route exact path="/" render={(props) => {
-              return (
-                <React.Fragment>
-                  <Home />
-                </React.Fragment>
-              )
-            }} />
-          </>
-      </Router>
-    </div>
-  )
+class App extends Component {
+
+  render() {
+
+    return (
+      <BrowserRouter>
+        <div className="App">
+          <Main/>
+        </div>
+      </BrowserRouter>
+    );
+  }
+
 
 }
 
-// const mapStateToProps = state => ({
-//   profile: state.profileFetch.profile,
-//   profileStaff:state.profileFetch.profileStaff,
-//   loginStatus: state.profileFetch.loginStatus,
-//   loginHome: state.profileFetch.loginHome,
-//   loginStatusStaff:state.profileFetch.loginStatusStaff
-// })
-// export default connect(mapStateToProps, { fetchProfile, fetchLoginStatus, fetchLoginHome,fetchLoginStatusStaff })(App);
-export default App
+export default App;

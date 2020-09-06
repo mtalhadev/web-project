@@ -1,6 +1,8 @@
 const express = require('express')
 const cors = require('cors')
 const mysql = require('mysql')
+// var http = require('http').createServer(app);
+// var io = require('socket.io')(http);
 const bodyParser = require("body-parser");
 const app = express()
 const path= require('path')
@@ -8,203 +10,136 @@ var cookieParser = require('cookie-parser');
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, './ui/build')));
 app.set('view engine', 'ejs');
-function SELECT_PARTNER(userid,interest){
-    return `SELECT * FROM userqueue WHERE userid!='${userid}' AND interest='${interest}' ORDER BY RAND() LIMIT 1;`
-}
-
-function INSERT_USER_IN_QUEUE(userid,interest){
-    if(interest){
-return `INSERT INTO userqueue(userid,interest) VALUES('${userid}','${interest}')`
-}
-else{
-    return `INSERT INTO userqueue(userid,interest) VALUES('${userid}','none')` 
-}
-}
-
-function CREATE_ROOM(userid1,userid2){
-    return `CREATE TABLE room${userid1}${userid2} (senderId VARCHAR(45),receiverid VARCHAR(45),message VARCHAR(1000))`
-}
-
-function DELETE_ROOM(roomNo){
-    return `DROP TABLE ${roomNo}`
-}
-
-function INSERT_MESSAGE(senderId,receiverId,message,roomNo){
-    return `INSERT INTO ${roomNo}(senderId,receiverId,message) VALUES('${senderId}','${receiverId}','${message}')`
-}
-
-function GET_MESSAGES(roomNo){
-    return `SELECT * FROM ${roomNo}`
-}
-
-function DELETE_USER_FROM_QUEUE(userid){
-return `DELETE FROM userqueue WHERE userid='${userid}'`
-}
-
-// const connection = mysql.createConnection({
-//     host:'localhost',
-//     user:'root',
-//     password:'rootpass',
-//     database:'db',
-//     insecureAuth : true
-// })
-
-var db_config = {
-    host:'qn0cquuabmqczee2.cbetxkdyhwsb.us-east-1.rds.amazonaws.com',
-    user:'y64jh32kx79aqv9x',
-    password:'s7furoesf5sz151c',
-    database:'o1mi2nd3ruws0d82'
-}
-function handleDisconnect() {
-	console.log('handleDisconnect()');
-	connection.destroy();
-	connection = mysql.createConnection(db_config);
-	connection.connect(function(err) {
-	    if(err) {
-			console.log(' Error when connecting to db  (DBERR001):', err);
-			setTimeout(handleDisconnect, 5000);
-	    }
-	});
-
-}
-var connection = mysql.createConnection(db_config);
-// const connection=mysql.createConnection("ALTER db 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'rootpass'")
-// connection.connect(err=>{
-//     if(err){
-//     return(err)
-// }else{
-//     console.log("connected to database")
-// }
-// })
-
-connection.connect(function(err) {                 // The server is either down
-    if(err) {                                   // or restarting (takes a while sometimes).
-        console.log('error when connecting to db:', err.code);
-        setTimeout(handleDisconnect, 1000);
-		handleDisconnect();
-           
-    }else{
-        console.log('Connected to db!');
-    }                                           // to avoid a hot loop, and to allow our node script to
-});    
-
-console.log("connectss")
-
 app.use(cors())
 
-// app.get('/',(req,res)=>{
-//     res.status(200).json({
-//         message: "runs",
-//         success:true
-//     });
-// });
+function INSERT_USER_IN_QUEUE(userid, interest) {
+    return `INSERT INTO userqueue VALUE('${userid}','${interest}')`
+}
 
-app.post('/insertinqueue',(req,res)=>{
-    const {userid,interest} = req.body
-   connection.query(INSERT_USER_IN_QUEUE(userid,interest),(err,results)=>{
-       if(err){
-           console.log(err,"error")
-       return res.send(err)
-    }
-       else{
-           console.log("success")
-       return res.send("success")
-    }
-   })
+
+function createPair() {
+    connection.query((`SELECT u1.* FROM userqueue u1, userqueue u2 WHERE u1.interest = u2.interest LIMIT 2;`), (err, results) => {
+        if (err) {
+            // console.log(err, "pairerror")
+        }
+        else {
+            //    console.log(results[0].interest,"pairresults")
+            if (results.length == 2) {
+                connection.query((`INSERT INTO pairs(user1,user2,interest) VALUES('${results[0].userid}','${results[1].userid}','${results[0].interest}')`))
+                connection.query((`DELETE FROM userqueue WHERE userid='${results[0].userid}'`))
+                connection.query((`DELETE FROM userqueue WHERE userid='${results[1].userid}'`))
+                connection.query((`CREATE TABLE room${results[0].userid}${results[1].userid}(senderid varchar(10),receiverid varchar(10),message varchar(1000))`))
+                console.log("enogh")
+            }
+            else {
+                console.log("not enough users")
+            }
+        }
+    })
+}
+
+
+
+// host:'35.224.113.38',
+// user:'root',
+// password:'bilalkhan',
+// database:'chatberg'
+
+
+const connection = mysql.createConnection({
+    host:'34.66.149.111',
+    user:'root',
+    password:'bilalkhan',
+    database:'chatberg'
 })
 
-app.post('/deletefromqueue',(req,res)=>{
-
-    const {userid} = req.body
-   connection.query(DELETE_USER_FROM_QUEUE(userid),(err,results)=>{
-       if(err){
-           console.log(err,"delete nhe hogia")
-       return res.send(err)
+connection.connect(err => {
+    if (err) {
+        console.log(err, "error connecting")
     }
-       else{
-           console.log("queue deleted")
-       return res.status(200).json({ success: true, results });
+    else {
+        console.log("connected to db")
     }
-   })
 })
 
+console.log(connection, "connection")
 
 
-app.post('/searchforpartner',(req,res)=>{
-    const {userid,interest} = req.body
-    connection.query(SELECT_PARTNER(userid,interest),(err,results)=>{
+app.get('/insertinqueue', (req, res) => {
+    const { userid, interest } = req.query
+    if(userid!==undefined){
+    connection.query(INSERT_USER_IN_QUEUE(userid, interest), (err, results) => {
+        if (err) {
+            return res.send(err)
+        }
+        else {
+            return res.send("success")
+        }
+    })
+}
+})
+
+app.get('/searchforpartner',(req,res)=>{
+    const {userid} = req.query
+    connection.query((`SELECT * FROM pairs WHERE user1='${userid}' OR user2='${userid}'`),(err,results)=>{
         if(err){
-            console.log(err,"searc")
             return res.send(err)
         }
         else{
-            if(results.length==0){
-            return res.status(400).json({ success: true, results });}
-            else{
-            console.log(results,"searc")
-        return res.status(200).json({ success: true, results });}
-     }
+            if(results.length>0){
+                console.log(results,"result aagya")
+                res.send(results)
+            }
+
+        }
     })
 })
 
-app.post('/createroom',(req,res)=>{
-    const {userid1,userid2} = req.body
-    console.log(userid1)
-    connection.query(CREATE_ROOM(userid1,userid2),(err,results)=>{
+
+
+app.get('/getmessages',(req,res)=>{
+    const {roomname} = req.query
+    connection.query((`SELECT * FROM ${roomname}`),(err,results)=>{
         if(err){
-            console.log(err,"error")
-        return res.send(err)
-     }
-        else{
-        console.log(results,"room");
-        return res.status(200).json({ success: true, results,roomNo:"room"+userid1+userid2 });
-     }
-    })
-
-})
-
-app.post('/deleteroom',(req,res)=>{
-    const {roomNo} = req.body
-    connection.query(DELETE_ROOM(roomNo),(err,results)=>{
-        if(err){
-            console.log(err,"delete nhe hua")
-        return res.send(err)
-     }
-        else{
-console.log("deletehogia")
-        return res.status(200).json({ success: true, results });
-     }
-    }) 
-})
-
-app.post('/insertmessage',(req,res)=>{
-    const {senderId,receiverId,message,roomNo} = req.body
-
-    connection.query(INSERT_MESSAGE(senderId,receiverId,message,roomNo),(err,results)=>{
-        if(err){
-            console.log(err,"messageeroor")
             return res.send(err)
         }
         else{
-            console.log(results,"message")
-        return res.status(200).json({ success: true, results });
-     }
+                return res.send(results)
+
+           
+        }
     })
 })
 
-app.post('/getmessages',(req,res)=>{
-    const {roomNo} = req.body
-    connection.query(GET_MESSAGES(roomNo),(err,results)=>{
+
+
+
+app.get('/sendmessage',(req,res)=>{
+    const {senderid,receiverid,message,roomname} = req.query
+    connection.query((`INSERT INTO ${roomname}(senderid,receiverid,message) VALUES('${senderid}','${receiverid}','${message}')`),(err,results)=>{
         if(err){
-            console.log(err,"getmessage")
-        return res.send(err)
-     }
+            return res.send(err)
+        }
         else{
-            console.log(results,"getmessageperfect")
-        return res.status(200).json({ success: true, results });
-     }
+            return res.send("success")
+        }
     })
 })
+
+app.get('/endchat',(req,res)=>{
+    const {userid,roomname} = req.query
+    connection.query((`DELETE FROM pairs WHERE user1='${userid}' OR user2='${userid}'`))
+    connection.query((`DROP TABLE ${roomname}`))
+})
+
+app.get('/setstatus',(req,res)=>{
+    const{id} = req.query
+})
+
+
+setInterval(() => {
+    createPair();
+}, 2000);
 
 
 app.get('*', (req,res) => {
